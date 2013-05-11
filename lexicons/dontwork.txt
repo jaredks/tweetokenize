@@ -1,0 +1,3 @@
+UTF-16
+Japanese (Mac OS)
+Japanese (Shift JIS)
