@@ -43,6 +43,7 @@ class Tokenizer(object):
     class TokenizerException(BaseException): pass
     html_entities = {k:unichr(v) for k,v in name2codepoint.items()}
     __default_args = None
+    _stopwords = set(['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now'])
     
     # Regular expressions
     usernames_re = re.compile(r"@\w{1,15}")
@@ -66,7 +67,7 @@ class Tokenizer(object):
     quotes_re = re.compile(ur"|".join(ur'(%s.*?%s)' % t for t in _doublequotes) + ur'|\s(\'.*?\')\s')
     #emoji_re = re.compile(ur'[\U0001f300-\U0001f5ff....
     
-    def __init__(self, lowercase=True, allcapskeep=True, normalize=3, usernames='USERNAME', urls='URL', hashtags=False, phonenumbers='PHONENUMBER', times='TIME', numbers='NUMBER', ignorequotes=False):
+    def __init__(self, lowercase=True, allcapskeep=True, normalize=3, usernames='USERNAME', urls='URL', hashtags=False, phonenumbers='PHONENUMBER', times='TIME', numbers='NUMBER', ignorequotes=False, ignorestopwords=False):
         """
         Constructs a new Tokenizer. Can specify custom settings for various 
         feature normalizations.
@@ -201,8 +202,7 @@ class Tokenizer(object):
                 newwords.append(self._cleanword(w))
             return u""
         while i < len(word):
-            # greedily check for emoticons in this word
-            for l in range(self._maxlenemo, 0, -1):
+            for l in range(self._maxlenemo, 0, -1): # greedily check for emoticons in this word
                 if word[i:i+l] in self._emoticons or self._isemoji(word[i:i+l]):
                     wordbefore = possibly_append_and_reset(wordbefore)
                     newwords.append(word[i:i+l])
@@ -215,8 +215,7 @@ class Tokenizer(object):
                 else:
                     wordbefore += word[i]
                 i+=1
-        # possible ending of the word which wasn't emoticon or punctuation
-        possibly_append_and_reset(wordbefore)
+        possibly_append_and_reset(wordbefore) # possible ending of word which wasn't emoticon or punctuation
         return newwords
     
     def _isemoji(self, s):
@@ -250,12 +249,13 @@ class Tokenizer(object):
         """
         if not isinstance(message, basestring):
             raise Tokenizer.TokenizerException('cannot tokenize non-string, %s' % repr(message.__class__.__name__))
-        message = self._unicode(message)
-        message = self._converthtmlentities(message)
+        message = self._converthtmlentities(self._unicode(message))
         if self.ignorequotes:
             message = Tokenizer.quotes_re.sub(" ", message)
-        message = Tokenizer.tokenize_re.findall(message)
-        return self._replacetokens(message)
+        message = self._replacetokens(Tokenizer.tokenize_re.findall(message))
+        if self.ignorestopwords:
+            message = [word for word in message if word not in self._stopwords]
+        return message
     
     def emoticons(self, iterable):
         """

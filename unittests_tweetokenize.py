@@ -248,6 +248,12 @@ class TokenizeTests(unittest.TestCase):
         tks = [u'#MentionSomeoneYoureGladYouMet', u':', u'USERNAME', u'of',
         u'course', u'.']
         self.assertEqual(self.tokenizer.tokenize(msg), tks)
+    
+    def test_stopwords_1(self):
+        self.tokenizer.ignorestopwords = True
+        msg = 'i like myself and my so not much and our something he:)'
+        tks = [u'like', u'much', u'something', u':)']
+        self.assertEqual(self.tokenizer.tokenize(msg), tks)
 
 if __name__ == "__main__":
     unittest.main()
