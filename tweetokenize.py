@@ -43,7 +43,6 @@ class Tokenizer(object):
     class TokenizerException(BaseException): pass
     html_entities = {k:unichr(v) for k,v in name2codepoint.items()}
     __default_args = None
-    _stopwords = set(['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now'])
     
     # Regular expressions
     usernames_re = re.compile(r"@\w{1,15}")
@@ -124,7 +123,9 @@ class Tokenizer(object):
             Tokenizer.__default_args = locals().keys()
         for keyword, value in locals().items():
             setattr(self, keyword, value)
-        self.emoticonsfromfile(path.dirname(path.realpath(__file__))+'/lexicons/emoticons.txt')
+        lexicons = path.dirname(path.realpath(__file__)) + '/lexicons/%s.txt'
+        self.emoticons(filename=lexicons % 'emoticons')
+        self.stopwords(filename=lexicons % 'stopwords')
     
     def __call__(self, iterable):
         """
@@ -257,26 +258,29 @@ class Tokenizer(object):
             message = [word for word in message if word not in self._stopwords]
         return message
     
-    def emoticons(self, iterable):
+    def emoticons(self, iterable=None, filename=None):
         """
         Consumes an iterable of emoticons that the tokenizer will tokenize on. 
         Allows for user-specified set of emoticons to be recognized.
         
         @param iterable: Object capable of iteration, providing emoticon 
             strings.
-        """
-        self._emoticons = set(imap(self._unicode, iterable))
-        self._maxlenemo = max(len(max(self._emoticons, key=lambda x: len(x))), len(u'🇨🇳'), len(u'💋'))
-    
-    def emoticonsfromfile(self, filename):
-        """
-        Import emoticon tokens delimited by newlines from a given file into a 
-        new set that the tokenizer will tokenize on. Strips trailing whitespace 
-        and skips blank lines.
-        
         @type filename: C{str}
         @param filename: Path to the file containing emoticons delimited by 
-            new lines.
+            new lines. Strips trailing whitespace and skips blank lines.
         """
-        with open(filename, "r") as f:
-            self.emoticons(self._unicode(l.rstrip()) for l in f if l.strip())
+        self._emoticons = self._collectset(iterable, filename)
+        self._maxlenemo = max(len(max(self._emoticons, key=lambda x: len(x))), len(u'🇨🇳'), len(u'💋'))
+    
+    def stopwords(self, iterable=None, filename=None):
+        self._stopwords = self._collectset(iterable, filename)
+    
+    def _collectset(self, iterable, filename):
+        if filename:
+            with open(filename, "r") as f:
+                s = set(l.rstrip() for l in f)
+                try:
+                    iterable = s.remove('')
+                except KeyError:
+                    iterable = s
+        return set(imap(self._unicode, iterable))
