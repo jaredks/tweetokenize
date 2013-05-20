@@ -66,7 +66,10 @@ class Tokenizer(object):
     quotes_re = re.compile(ur"|".join(ur'(%s.*?%s)' % t for t in _doublequotes) + ur'|\s(\'.*?\')\s')
     #emoji_re = re.compile(ur'[\U0001f300-\U0001f5ff....
     
-    def __init__(self, lowercase=True, allcapskeep=True, normalize=3, usernames='USERNAME', urls='URL', hashtags=False, phonenumbers='PHONENUMBER', times='TIME', numbers='NUMBER', ignorequotes=False, ignorestopwords=False):
+    def __init__(self, lowercase=True, allcapskeep=True, normalize=3,
+                 usernames='USERNAME', urls='URL', hashtags=False,
+                 phonenumbers='PHONENUMBER', times='TIME', numbers='NUMBER',
+                 ignorequotes=False, ignorestopwords=False):
         """
         Constructs a new Tokenizer. Can specify custom settings for various 
         feature normalizations.
@@ -76,8 +79,8 @@ class Tokenizer(object):
         C{"REMOVE"}.
         
         @type lowercase: C{bool}
-        @param lowercase: If C{True}, lowercases words, excluding those with all 
-            letters capitalized.
+        @param lowercase: If C{True}, lowercases words, excluding those with 
+            all letters capitalized.
         
         @type allcapskeep: C{bool}
         @param allcapskeep: If C{True}, maintains capitalization for words with 
@@ -116,8 +119,12 @@ class Tokenizer(object):
         @param numbers: Replacement token for any other kinds of numbers.
         
         @type ignorequotes: C{bool}
-        @param ignorequotes: If C{True}, will remove various types of quotes and 
-            the contents within.
+        @param ignorequotes: If C{True}, will remove various types of quotes 
+            and the contents within.
+        
+        @type ignorestopwords: C{bool}
+        @param ignorestopwords: If C{True}, will remove any stopwords. The 
+            default set includes 'I', 'me', 'itself', 'against', 'should', etc.
         """
         if Tokenizer.__default_args is None:
             Tokenizer.__default_args = locals().keys()
@@ -163,7 +170,7 @@ class Tokenizer(object):
             s = s.group(0)[1:-1] # remove & and ;
             if s[0] == '#':
                 try:
-                    return unichr(int(s[2:], 16) if s[1] in ('x','X') else int(s[1:]))
+                    return unichr(int(s[2:],16) if s[1] in 'xX' else int(s[1:]))
                 except ValueError:
                     return '&#' + s + ';'
             else:
@@ -203,7 +210,8 @@ class Tokenizer(object):
                 newwords.append(self._cleanword(w))
             return u""
         while i < len(word):
-            for l in range(self._maxlenemo, 0, -1): # greedily check for emoticons in this word
+            # greedily check for emoticons in this word
+            for l in range(self._maxlenemo, 0, -1):
                 if word[i:i+l] in self._emoticons or self._isemoji(word[i:i+l]):
                     wordbefore = possibly_append_and_reset(wordbefore)
                     newwords.append(word[i:i+l])
@@ -216,7 +224,8 @@ class Tokenizer(object):
                 else:
                     wordbefore += word[i]
                 i+=1
-        possibly_append_and_reset(wordbefore) # possible ending of word which wasn't emoticon or punctuation
+        # possible ending of word which wasn't emoticon or punctuation
+        possibly_append_and_reset(wordbefore)
         return newwords
     
     def _isemoji(self, s):
@@ -249,7 +258,8 @@ class Tokenizer(object):
         @param message: The string representation of the message.
         """
         if not isinstance(message, basestring):
-            raise Tokenizer.TokenizerException('cannot tokenize non-string, %s' % repr(message.__class__.__name__))
+            raise Tokenizer.TokenizerException('cannot tokenize non-string, %s'
+            % repr(message.__class__.__name__))
         message = self._converthtmlentities(self._unicode(message))
         if self.ignorequotes:
             message = Tokenizer.quotes_re.sub(" ", message)
@@ -270,17 +280,26 @@ class Tokenizer(object):
             new lines. Strips trailing whitespace and skips blank lines.
         """
         self._emoticons = self._collectset(iterable, filename)
-        self._maxlenemo = max(len(max(self._emoticons, key=lambda x: len(x))), len(u'🇨🇳'), len(u'💋'))
+        self._maxlenemo = max(len(max(self._emoticons, key=lambda x: len(x))),
+        len(u'🇨🇳'), len(u'💋'))
     
     def stopwords(self, iterable=None, filename=None):
+        """
+        Consumes an iterable of stopwords that the tokenizer will ignore if the 
+        stopwords setting is C{True}. The default set is taken from NLTK's 
+        english list.
+        
+        @param iterable: Object capable of iteration, providing stopword 
+            strings.
+        @type filename: C{str}
+        @param filename: Path to the file containing stopwords delimited by 
+            new lines. Strips trailing whitespace and skips blank lines.
+        """
         self._stopwords = self._collectset(iterable, filename)
     
     def _collectset(self, iterable, filename):
         if filename:
             with open(filename, "r") as f:
-                s = set(l.rstrip() for l in f)
-                try:
-                    iterable = s.remove('')
-                except KeyError:
-                    iterable = s
+                iterable = set(l.rstrip() for l in f)
+                iterable.discard('')
         return set(imap(self._unicode, iterable))
