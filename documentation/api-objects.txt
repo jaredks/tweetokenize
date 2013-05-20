@@ -13,6 +13,7 @@ tweetokenize.Tokenizer.__init__	tweetokenize.Tokenizer-class.html#__init__
 tweetokenize.Tokenizer.emoticons	tweetokenize.Tokenizer-class.html#emoticons
 tweetokenize.Tokenizer.TokenizerException	tweetokenize.Tokenizer.TokenizerException-class.html
 tweetokenize.Tokenizer.punctuation	tweetokenize.Tokenizer-class.html#punctuation
+tweetokenize.Tokenizer._collectset	tweetokenize.Tokenizer-class.html#_collectset
 tweetokenize.Tokenizer._isemoji	tweetokenize.Tokenizer-class.html#_isemoji
 tweetokenize.Tokenizer.numbers_re	tweetokenize.Tokenizer-class.html#numbers_re
 tweetokenize.Tokenizer.times_re	tweetokenize.Tokenizer-class.html#times_re
@@ -30,7 +31,7 @@ tweetokenize.Tokenizer._doublequotes	tweetokenize.Tokenizer-class.html#_doublequ
 tweetokenize.Tokenizer._token_regexs	tweetokenize.Tokenizer-class.html#_token_regexs
 tweetokenize.Tokenizer.other_re	tweetokenize.Tokenizer-class.html#other_re
 tweetokenize.Tokenizer.ellipsis_re	tweetokenize.Tokenizer-class.html#ellipsis_re
-tweetokenize.Tokenizer.emoticonsfromfile	tweetokenize.Tokenizer-class.html#emoticonsfromfile
+tweetokenize.Tokenizer.stopwords	tweetokenize.Tokenizer-class.html#stopwords
 tweetokenize.Tokenizer.html_entities_re	tweetokenize.Tokenizer-class.html#html_entities_re
 tweetokenize.Tokenizer.hashtags_re	tweetokenize.Tokenizer-class.html#hashtags_re
 tweetokenize.Tokenizer.__default_args	tweetokenize.Tokenizer-class.html#__default_args

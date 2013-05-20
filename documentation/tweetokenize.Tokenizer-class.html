@@ -112,7 +112,8 @@ object --+
         <span class="summary-sig-arg">phonenumbers</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">PHONENUMBER</code><code class="variable-quote">'</code></span>,
         <span class="summary-sig-arg">times</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">TIME</code><code class="variable-quote">'</code></span>,
         <span class="summary-sig-arg">numbers</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">NUMBER</code><code class="variable-quote">'</code></span>,
-        <span class="summary-sig-arg">ignorequotes</span>=<span class="summary-sig-default">False</span>)</span><br />
+        <span class="summary-sig-arg">ignorequotes</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">ignorestopwords</span>=<span class="summary-sig-default">False</span>)</span><br />
       Constructs a new Tokenizer.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="tweetokenize-pysrc.html#Tokenizer.__init__">source&nbsp;code</a></span>
@@ -185,7 +186,8 @@ object --+
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="tweetokenize.Tokenizer-class.html#emoticons" class="summary-sig-name">emoticons</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">iterable</span>)</span><br />
+        <span class="summary-sig-arg">iterable</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">filename</span>=<span class="summary-sig-default">None</span>)</span><br />
       Consumes an iterable of emoticons that the tokenizer will tokenize 
       on.</td>
           <td align="right" valign="top">
@@ -203,12 +205,13 @@ object --+
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="tweetokenize.Tokenizer-class.html#emoticonsfromfile" class="summary-sig-name">emoticonsfromfile</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">filename</span>)</span><br />
-      Import emoticon tokens delimited by newlines from a given file into a
-      new set that the tokenizer will tokenize on.</td>
+          <td><span class="summary-sig"><a href="tweetokenize.Tokenizer-class.html#stopwords" class="summary-sig-name">stopwords</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">iterable</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">filename</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Consumes an iterable of stopwords that the tokenizer will ignore if 
+      the stopwords setting is <code>True</code>.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="tweetokenize-pysrc.html#Tokenizer.emoticonsfromfile">source&nbsp;code</a></span>
+            <span class="codelink"><a href="tweetokenize-pysrc.html#Tokenizer.stopwords">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -419,7 +422,8 @@ f02)|\s(\'.*?\')\s')">re.compile(r'<code class="re-group">(</code>\u201c.<code c
         <span class="sig-arg">phonenumbers</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string">PHONENUMBER</code><code class="variable-quote">'</code></span>,
         <span class="sig-arg">times</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string">TIME</code><code class="variable-quote">'</code></span>,
         <span class="sig-arg">numbers</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string">NUMBER</code><code class="variable-quote">'</code></span>,
-        <span class="sig-arg">ignorequotes</span>=<span class="sig-default">False</span>)</span>
+        <span class="sig-arg">ignorequotes</span>=<span class="sig-default">False</span>,
+        <span class="sig-arg">ignorestopwords</span>=<span class="sig-default">False</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
@@ -467,6 +471,8 @@ f02)|\s(\'.*?\')\s')">re.compile(r'<code class="re-group">(</code>\u201c.<code c
         <li><strong class="pname"><code>numbers</code></strong> - Replacement token for any other kinds of numbers.</li>
         <li><strong class="pname"><code>ignorequotes</code></strong> (<code>bool</code>) - If <code>True</code>, will remove various types of quotes and the
           contents within.</li>
+        <li><strong class="pname"><code>ignorestopwords</code></strong> (<code>bool</code>) - If <code>True</code>, will remove any stopwords. The default set 
+          includes 'I', 'me', 'itself', 'against', 'should', etc.</li>
     </ul></dd>
     <dt>Overrides:
         object.__init__
@@ -566,7 +572,8 @@ f02)|\s(\'.*?\')\s')">re.compile(r'<code class="re-group">(</code>\u201c.<code c
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">emoticons</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">iterable</span>)</span>
+        <span class="sig-arg">iterable</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">filename</span>=<span class="sig-default">None</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="tweetokenize-pysrc.html#Tokenizer.emoticons">source&nbsp;code</a></span>&nbsp;
@@ -579,32 +586,37 @@ f02)|\s(\'.*?\')\s')">re.compile(r'<code class="re-group">(</code>\u201c.<code c
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
         <li><strong class="pname"><code>iterable</code></strong> - Object capable of iteration, providing emoticon strings.</li>
+        <li><strong class="pname"><code>filename</code></strong> (<code>str</code>) - Path to the file containing emoticons delimited by new lines. 
+          Strips trailing whitespace and skips blank lines.</li>
     </ul></dd>
   </dl>
 </td></tr></table>
 </div>
-<a name="emoticonsfromfile"></a>
+<a name="stopwords"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">emoticonsfromfile</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">filename</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">stopwords</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">iterable</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">filename</span>=<span class="sig-default">None</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="tweetokenize-pysrc.html#Tokenizer.emoticonsfromfile">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="tweetokenize-pysrc.html#Tokenizer.stopwords">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>Import emoticon tokens delimited by newlines from a given file into a 
-  new set that the tokenizer will tokenize on. Strips trailing whitespace 
-  and skips blank lines.</p>
+  <p>Consumes an iterable of stopwords that the tokenizer will ignore if 
+  the stopwords setting is <code>True</code>. The default set is taken from
+  NLTK's english list.</p>
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>filename</code></strong> (<code>str</code>) - Path to the file containing emoticons delimited by new lines.</li>
+        <li><strong class="pname"><code>iterable</code></strong> - Object capable of iteration, providing stopword strings.</li>
+        <li><strong class="pname"><code>filename</code></strong> (<code>str</code>) - Path to the file containing stopwords delimited by new lines. 
+          Strips trailing whitespace and skips blank lines.</li>
     </ul></dd>
   </dl>
 </td></tr></table>
@@ -818,7 +830,7 @@ f02<code class="re-group">)</code><code class="re-op">|</code>\s<code class="re-
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Sat May 11 03:39:54 2013
+    Generated by Epydoc 3.0.1 on Mon May 20 02:41:06 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

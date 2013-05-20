@@ -11,8 +11,8 @@ messages of the social networking variety.
 ```python
 from tweetokenize import Tokenizer
 gettokens = Tokenizer()
-gettokens.tokenize('hey playa!:):3…..@SHAQ can you still dunk?#old🍕🍔😵LOL')
-[u'hey', u'playa', u'!', u':)', u':3', u'...', u'USERNAME', u'can', u'you', u'still', u'dunk', u'?', u'#old', u'u'🍕', 'u'🍔', u'😵', u'LOL']
+gettokens.tokenize('hey playa!:):3.....@SHAQ can you still dunk?#old🍕🍔😵LOL')
+[u'hey', u'playa', u'!', u':)', u':3', u'...', u'USERNAME', u'can', u'you', u'still', u'dunk', u'?', u'#old', u'🍕', 'u'🍔', u'😵', u'LOL']
 ```
 
 Features
