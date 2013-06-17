@@ -40,10 +40,11 @@ class Tokenizer(object):
       >>> gettokens.tokenize('@justinbeiber yo man!love you#inlove#wantyou in a totally straight way #brotime <3:p:D www.justinbeiber.com')
       [u'USER', u'yo', u'man', u'!', u'love', u'you', u'#inlove', u'#wantyou', u'in', u'a', u'totally', u'straight', u'way', u'#brotime', u'<3', u':p', u':D']
     """
-    class TokenizerException(BaseException): pass
+    class TokenizerException(BaseException):
+        pass
     html_entities = {k:unichr(v) for k,v in name2codepoint.items()}
     __default_args = None
-    
+
     # Regular expressions
     usernames_re = re.compile(r"@\w{1,15}")
     _topleveldomains = 'museum|travel|aero|arpa|asia|coop|info|jobs|mobi|name|post|biz|cat|com|edu|gov|int|mil|net|org|pro|tel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cw|cx|cy|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw'
@@ -58,14 +59,14 @@ class Tokenizer(object):
     other_re = r"(?:[^#\s\.]|\.(?!\.))+"
     _token_regexs = ('usernames', 'urls', 'hashtags', 'times', 'phonenumbers', 'numbers')
     tokenize_re = re.compile(ur"|".join(imap(lambda x: getattr(x, 'pattern', x),
-        [locals()['%s_re' % regex] for regex in _token_regexs] + [word_re, ellipsis_re, other_re]))); del regex
+        [locals()['%s_re' % regex] for regex in _token_regexs] + [word_re, ellipsis_re, other_re])))
+    del regex  # otherwise stays in class namespace
     html_entities_re = re.compile(r"&#?\w+;")
     repeating_re = re.compile(r"([a-zA-Z])\1\1+")
     _doublequotes = ((u'“',u'”'),(u'"',u'"'),(u'‘',u'’'),(u'＂',u'＂'))
     punctuation = (u'!$%()*+,-/:;<=>?[\\]^_.`{|}~\'' + u''.join(c for t in _doublequotes for c in t))
     quotes_re = re.compile(ur"|".join(ur'(%s.*?%s)' % t for t in _doublequotes) + ur'|\s(\'.*?\')\s')
-    #emoji_re = re.compile(ur'[\U0001f300-\U0001f5ff....
-    
+
     def __init__(self, lowercase=True, allcapskeep=True, normalize=3,
                  usernames='USERNAME', urls='URL', hashtags=False,
                  phonenumbers='PHONENUMBER', times='TIME', numbers='NUMBER',
@@ -126,14 +127,14 @@ class Tokenizer(object):
         @param ignorestopwords: If C{True}, will remove any stopwords. The 
             default set includes 'I', 'me', 'itself', 'against', 'should', etc.
         """
-        if Tokenizer.__default_args is None:
-            Tokenizer.__default_args = locals().keys()
+        if self.__default_args is None:
+            self.__default_args = locals().keys()
         for keyword, value in locals().items():
             setattr(self, keyword, value)
         lexicons = path.dirname(path.realpath(__file__)) + '/lexicons/%s.txt'
         self.emoticons(filename=lexicons % 'emoticons')
         self.stopwords(filename=lexicons % 'stopwords')
-    
+
     def __call__(self, iterable):
         """
         Iterator for the tokenization of given messages.
@@ -146,7 +147,7 @@ class Tokenizer(object):
         """
         for msg in iterable:
             yield self.tokenize(msg)
-    
+
     def update(self, **kwargs):
         """
         Adjust any settings of the Tokenizer.
@@ -161,10 +162,10 @@ class Tokenizer(object):
           >>> gettokens.phonenumbers
           'NUMBER'
         """
-        for keyword in Tokenizer.__default_args:
+        for keyword in self.__default_args:
             if keyword in kwargs:
                 setattr(self, keyword, kwargs[keyword])
-    
+
     def _converthtmlentities(self, msg):
         def replace_entities(s):
             s = s.group(0)[1:-1] # remove & and ;
@@ -175,19 +176,19 @@ class Tokenizer(object):
                     return '&#' + s + ';'
             else:
                 try:
-                    return Tokenizer.html_entities[s]
+                    return self.html_entities[s]
                 except KeyError:
                     return '&' + s + ';'
-        return Tokenizer.html_entities_re.sub(replace_entities, msg)
-    
+        return self.html_entities_re.sub(replace_entities, msg)
+
     def _replacetokens(self, msg):
         tokens = []; deletion_tokens = ('','REMOVE','remove','DELETE','delete')
         for word in msg:
-            matching = Tokenizer.word_re.match(word) # 1st check if normal word
+            matching = self.word_re.match(word) # 1st check if normal word
             if matching and len(matching.group(0)) == len(word):
                 tokens.append(self._cleanword(word))
                 continue # don't check rest of conditions
-            for token in Tokenizer._token_regexs: # id & possibly replace tokens
+            for token in self._token_regexs: # id & possibly replace tokens
                 regex = getattr(Tokenizer, '%s_re' % token)
                 replacementtoken = getattr(self, token)
                 if regex.match(word):
@@ -197,12 +198,12 @@ class Tokenizer(object):
                         tokens.append(word)
                     break
             else: # we didn't find a match for any token so far...
-                if Tokenizer.ellipsis_re.match(word):
+                if self.ellipsis_re.match(word):
                     tokens.append(u"...")
                 else: # split into tokens based on emoticons or punctuation
                     tokens.extend(self._separate_emoticons_punctuation(word))
         return tokens
-    
+
     def _separate_emoticons_punctuation(self, word):
         newwords=[]; wordbefore=u""; i=0
         def possibly_append_and_reset(w):
@@ -218,7 +219,7 @@ class Tokenizer(object):
                     i+=l
                     break
             else: # its safe to break up any punctuation not part of emoticons
-                if word[i] in Tokenizer.punctuation:
+                if word[i] in self.punctuation:
                     wordbefore = possibly_append_and_reset(wordbefore)
                     newwords.append(word[i])
                 else:
@@ -227,25 +228,29 @@ class Tokenizer(object):
         # possible ending of word which wasn't emoticon or punctuation
         possibly_append_and_reset(wordbefore)
         return newwords
-    
+
     def _isemoji(self, s):
-        emoji_ranges = ((u'🌀', u'🗿'), (u'😀', u'🙏'), (u'🚀', u'🛅'), (u'☀', u'⛿'), (u'🅰', u'🆚'))
-        emoji_flags =  set([u'🇯🇵', u'🇰🇷', u'🇩🇪', u'🇨🇳', u'🇺🇸', u'🇫🇷', u'🇪🇸', u'🇮🇹', u'🇷🇺', u'🇬🇧'])
-        check_emoji = lambda given: len(given) == len(u'💩') and any(e[0] <= given <= e[1] for e in emoji_ranges)
+        emoji_ranges = ((u'\U0001f300', u'\U0001f5ff'), (u'\U0001f600', u'\U0001f64f'),
+                        (u'\U0001f680', u'\U0001f6c5'), (u'\u2600', u'\u26ff'), (u'\U0001f170', u'\U0001f19a'))
+        emoji_flags =  {u'\U0001f1ef\U0001f1f5', u'\U0001f1f0\U0001f1f7', u'\U0001f1e9\U0001f1ea',
+                        u'\U0001f1e8\U0001f1f3', u'\U0001f1fa\U0001f1f8', u'\U0001f1eb\U0001f1f7',
+                        u'\U0001f1ea\U0001f1f8', u'\U0001f1ee\U0001f1f9', u'\U0001f1f7\U0001f1fa',
+                        u'\U0001f1ec\U0001f1e7'}
+        check_emoji = lambda given: len(given) == len(u'\U0001f4a9') and any(l <= given <= u for l,u in emoji_ranges)
         return check_emoji(s) or s in emoji_flags
-    
+
     def _cleanword(self, word):
         if self.normalize: # replace characters with >=3 alphabetic repeating
-            word = Tokenizer.repeating_re.sub(r"\1"*self.normalize, word)
+            word = self.repeating_re.sub(r"\1"*self.normalize, word)
         if self.lowercase and (not self.allcapskeep or not word.isupper()):
             return word.lower()
         return word
-    
+
     def _unicode(self, word):
         if isinstance(word, unicode):
             return word
         return unicode(word, encoding='utf-8')
-    
+
     def tokenize(self, message):
         """
         Tokenize the given string into a list of strings representing the 
@@ -258,16 +263,16 @@ class Tokenizer(object):
         @param message: The string representation of the message.
         """
         if not isinstance(message, basestring):
-            raise Tokenizer.TokenizerException('cannot tokenize non-string, %s'
+            raise self.TokenizerException('cannot tokenize non-string, %s'
             % repr(message.__class__.__name__))
         message = self._converthtmlentities(self._unicode(message))
         if self.ignorequotes:
-            message = Tokenizer.quotes_re.sub(" ", message)
-        message = self._replacetokens(Tokenizer.tokenize_re.findall(message))
+            message = self.quotes_re.sub(" ", message)
+        message = self._replacetokens(self.tokenize_re.findall(message))
         if self.ignorestopwords:
             message = [word for word in message if word not in self._stopwords]
         return message
-    
+
     def emoticons(self, iterable=None, filename=None):
         """
         Consumes an iterable of emoticons that the tokenizer will tokenize on. 
@@ -281,8 +286,8 @@ class Tokenizer(object):
         """
         self._emoticons = self._collectset(iterable, filename)
         self._maxlenemo = max(len(max(self._emoticons, key=lambda x: len(x))),
-        len(u'🇨🇳'), len(u'💋'))
-    
+        len(u'\U0001f1e8\U0001f1f3'), len(u'\U0001f48b'))
+
     def stopwords(self, iterable=None, filename=None):
         """
         Consumes an iterable of stopwords that the tokenizer will ignore if the 
@@ -296,7 +301,7 @@ class Tokenizer(object):
             new lines. Strips trailing whitespace and skips blank lines.
         """
         self._stopwords = self._collectset(iterable, filename)
-    
+
     def _collectset(self, iterable, filename):
         if filename:
             with open(filename, "r") as f:

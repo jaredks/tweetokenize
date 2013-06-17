@@ -1,18 +1,18 @@
 tweetokenize
 ============
 
-Tokenization and pre-processing for social media data used to train classifiers.
-Focused on classification of sentiment, emotion, or mood.
+Regular expression based tokenizer for Twitter. Focused on tokenization
+and pre-processing to train classifiers for sentiment, emotion, or mood.
 
-Intended as glue between Python wrappers for Twitter API and the Natural 
-Language Toolkit (NLTK), but probably applicable to tokenizing any short 
+Intended as glue between Python wrappers for Twitter API and the Natural
+Language Toolkit (NLTK), but probably applicable to tokenizing any short
 messages of the social networking variety.
 
 ```python
 from tweetokenize import Tokenizer
 gettokens = Tokenizer()
 gettokens.tokenize('hey playa!:):3.....@SHAQ can you still dunk?#old🍕🍔😵LOL')
-[u'hey', u'playa', u'!', u':)', u':3', u'...', u'USERNAME', u'can', u'you', u'still', u'dunk', u'?', u'#old', u'🍕', 'u'🍔', u'😵', u'LOL']
+[u'hey', u'playa', u'!', u':)', u':3', u'...', u'USERNAME', u'can', u'you', u'still', u'dunk', u'?', u'#old', u'🍕', u'🍔', u'😵', u'LOL']
 ```
 
 Features
