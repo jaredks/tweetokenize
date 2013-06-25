@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# tweetokenize: Regular expression based tokenizer for Twitter
 # Copyright: (c) 2013, Jared Suttles. All rights reserved.
 # License: See LICENSE for details.
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 import unittest
 from tweetokenize import Tokenizer
+
 
 class TokenizeTests(unittest.TestCase):
     def setUp(self):

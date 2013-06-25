@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# tweetokenize: Regular expression based tokenizer for Twitter
 # Copyright: (c) 2013, Jared Suttles. All rights reserved.
 # License: See LICENSE for details.
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 """
 Tokenization and pre-processing for social media data used to train classifiers.
@@ -21,10 +22,7 @@ content from Twitter.
 
 import re
 from os import path
-try:
-    from itertools import imap
-except ImportError:
-    imap = map
+from itertools import imap
 from htmlentitydefs import name2codepoint
 
 class Tokenizer(object):
@@ -37,40 +35,47 @@ class Tokenizer(object):
     
       >>> from tweetokenize import Tokenizer
       >>> gettokens = Tokenizer(usernames='USER', urls='')
-      >>> gettokens.tokenize('@justinbeiber yo man!love you#inlove#wantyou in a totally straight way #brotime <3:p:D www.justinbeiber.com')
-      [u'USER', u'yo', u'man', u'!', u'love', u'you', u'#inlove', u'#wantyou', u'in', u'a', u'totally', u'straight', u'way', u'#brotime', u'<3', u':p', u':D']
+      >>> gettokens.tokenize('@justinbeiber yo man!love you#inlove#wantyou in a totally straight way #brotime <3:p:D
+      www.justinbeiber.com')
+      [u'USER', u'yo', u'man', u'!', u'love', u'you', u'#inlove', u'#wantyou', u'in', u'a', u'totally', u'straight',
+      u'way', u'#brotime', u'<3', u':p', u':D']
     """
     class TokenizerException(BaseException):
         pass
     html_entities = {k:unichr(v) for k,v in name2codepoint.items()}
     __default_args = None
+    _lexicons = path.dirname(path.realpath(__file__)) + '/lexicons/{}.txt'
 
     # Regular expressions
     usernames_re = re.compile(r"@\w{1,15}")
-    _topleveldomains = 'museum|travel|aero|arpa|asia|coop|info|jobs|mobi|name|post|biz|cat|com|edu|gov|int|mil|net|org|pro|tel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cw|cx|cy|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw'
-    urls_re = re.compile(r"(?:(?:https?\://[A-Za-z0-9\.]+)|(?:(?:www\.)?[A-Za-z0-9]+\.(?:%s)))(?:\/\S+)?(?=\s+|$)" % _topleveldomains)
+    with open(_lexicons.format('domains'), 'r') as f:
+        domains = f.read()
+    urls_re = re.compile(r"(?:(?:https?\://[A-Za-z0-9\.]+)|(?:(?:www\.)?[A-Za-z0-9]+\.(?:{})))(?:\/\S+)?"
+                         "(?=\s+|$)".format(domains))
+    del domains
     hashtags_re = re.compile(r"#\w+[\w'-]*\w+")
     ellipsis_re = re.compile(r"\.\.+")
     word_re = re.compile(r"(?:[a-zA-Z0-9]+['-]?[a-zA-Z]+[a-zA-Z0-9]*)|(?:[a-zA-Z0-9]*[a-zA-Z]+['-]?[a-zA-Z0-9]+)")
     times_re = re.compile(r"\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?")
-    phonenumbers_re = re.compile(r"(?:\+?[01][\-\s\.]*)?(?:\(?\d{3}[\-\s\.\)]*)?\d{3}[\-\s\.]*\d{4}(?:\s*x\s*\d+)?(?=\s+|$)")
-    _number = r"(?:[+-]?\$?\d+(?:\.\d+)?(?:[eE]-?\d+)?%?)(?![A-Za-z])"
-    numbers_re = re.compile(r"%(num)s(?:\s*/\s*%(num)s)?" % {'num': _number}) # deals with fractions
+    phonenumbers_re = re.compile(r"(?:\+?[01][\-\s\.]*)?(?:\(?\d{3}[\-\s\.\)]*)?\d{3}[\-\s\.]*\d{4}(?:\s*x\s*\d+)?"
+                                 "(?=\s+|$)")
+    number_re = r"(?:[+-]?\$?\d+(?:\.\d+)?(?:[eE]-?\d+)?%?)(?![A-Za-z])"
+    numbers_re = re.compile(r"{0}(?:\s*/\s*{0})?".format(number_re))  # deals with fractions
+    del number_re
     other_re = r"(?:[^#\s\.]|\.(?!\.))+"
     _token_regexs = ('usernames', 'urls', 'hashtags', 'times', 'phonenumbers', 'numbers')
     tokenize_re = re.compile(ur"|".join(imap(lambda x: getattr(x, 'pattern', x),
-        [locals()['%s_re' % regex] for regex in _token_regexs] + [word_re, ellipsis_re, other_re])))
+        [locals()[regex + '_re'] for regex in _token_regexs] + [word_re, ellipsis_re, other_re])))
     del regex  # otherwise stays in class namespace
     html_entities_re = re.compile(r"&#?\w+;")
     repeating_re = re.compile(r"([a-zA-Z])\1\1+")
-    _doublequotes = ((u'“',u'”'),(u'"',u'"'),(u'‘',u'’'),(u'＂',u'＂'))
-    punctuation = (u'!$%()*+,-/:;<=>?[\\]^_.`{|}~\'' + u''.join(c for t in _doublequotes for c in t))
-    quotes_re = re.compile(ur"|".join(ur'(%s.*?%s)' % t for t in _doublequotes) + ur'|\s(\'.*?\')\s')
+    doublequotes = ((u'“',u'”'),(u'"',u'"'),(u'‘',u'’'),(u'＂',u'＂'))
+    punctuation = (u'!$%()*+,-/:;<=>?[\\]^_.`{|}~\'' + u''.join(c for t in doublequotes for c in t))
+    quotes_re = re.compile(ur"|".join(ur'({}.*?{})'.format(f,s) for f,s in doublequotes) + ur'|\s(\'.*?\')\s')
+    del doublequotes
 
-    def __init__(self, lowercase=True, allcapskeep=True, normalize=3,
-                 usernames='USERNAME', urls='URL', hashtags=False,
-                 phonenumbers='PHONENUMBER', times='TIME', numbers='NUMBER',
-                 ignorequotes=False, ignorestopwords=False):
+    def __init__(self, lowercase=True, allcapskeep=True, normalize=3, usernames='USERNAME', urls='URL', hashtags=False,
+                 phonenumbers='PHONENUMBER', times='TIME', numbers='NUMBER', ignorequotes=False, ignorestopwords=False):
         """
         Constructs a new Tokenizer. Can specify custom settings for various 
         feature normalizations.
@@ -131,9 +136,8 @@ class Tokenizer(object):
             self.__default_args = locals().keys()
         for keyword, value in locals().items():
             setattr(self, keyword, value)
-        lexicons = path.dirname(path.realpath(__file__)) + '/lexicons/%s.txt'
-        self.emoticons(filename=lexicons % 'emoticons')
-        self.stopwords(filename=lexicons % 'stopwords')
+        self.emoticons(filename=self._lexicons.format('emoticons'))
+        self.stopwords(filename=self._lexicons.format('stopwords'))
 
     def __call__(self, iterable):
         """
@@ -182,14 +186,15 @@ class Tokenizer(object):
         return self.html_entities_re.sub(replace_entities, msg)
 
     def _replacetokens(self, msg):
-        tokens = []; deletion_tokens = ('','REMOVE','remove','DELETE','delete')
+        tokens = []
+        deletion_tokens = ('', 'REMOVE', 'remove', 'DELETE', 'delete')
         for word in msg:
             matching = self.word_re.match(word) # 1st check if normal word
             if matching and len(matching.group(0)) == len(word):
                 tokens.append(self._cleanword(word))
                 continue # don't check rest of conditions
             for token in self._token_regexs: # id & possibly replace tokens
-                regex = getattr(Tokenizer, '%s_re' % token)
+                regex = getattr(self, token + '_re')
                 replacementtoken = getattr(self, token)
                 if regex.match(word):
                     if replacementtoken: # decide if we change it
@@ -205,7 +210,9 @@ class Tokenizer(object):
         return tokens
 
     def _separate_emoticons_punctuation(self, word):
-        newwords=[]; wordbefore=u""; i=0
+        newwords = []
+        wordbefore = u""
+        i = 0
         def possibly_append_and_reset(w):
             if w:
                 newwords.append(self._cleanword(w))
@@ -263,8 +270,7 @@ class Tokenizer(object):
         @param message: The string representation of the message.
         """
         if not isinstance(message, basestring):
-            raise self.TokenizerException('cannot tokenize non-string, %s'
-            % repr(message.__class__.__name__))
+            raise self.TokenizerException('cannot tokenize non-string, {}'.format(repr(message.__class__.__name__)))
         message = self._converthtmlentities(self._unicode(message))
         if self.ignorequotes:
             message = self.quotes_re.sub(" ", message)

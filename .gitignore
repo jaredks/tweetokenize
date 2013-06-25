@@ -1,7 +1,5 @@
 .DS_Store
 *.pyc
-tokenizetweets.py
-speedtest.py
-sample_11-8-12_speed.tweets
-sample_11-8-12.tweets
 .gitignore
+build
+benchmarks

@@ -16,13 +16,18 @@ gettokens.tokenize('hey playa!:):3.....@SHAQ can you still dunk?#old🍕🍔😵
 ```
 
 Features
-========
+--------
 
 * Can easily replace tweet features like usernames, urls, phone numbers, times, 
 etc. with tokens in order to reduce feature set complexity and improve 
 performance of classifiers
 * Allows user-defined sets of emoticons to be used in tokenization
 * Correctly separates emoji, written consecutively, into individual tokens
+
+Using
+-----
+
+    python setup.py install
 
 Documentation
 -------------
@@ -31,5 +36,5 @@ http://htmlpreview.github.io/?https://raw.github.com/jaredks/tweetokenize/master
 
 License
 -------
-"Modified BSD License". See LICENSE for details.
-Copyright Jared Suttles, 2013.
+
+"Modified BSD License". See LICENSE for details. Copyright Jared Suttles, 2013.
