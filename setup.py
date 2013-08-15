@@ -10,7 +10,7 @@ setup(
     url='https://github.com/jaredks/tweetokenize',
     packages=['tweetokenize'],
     package_data={'': ['LICENSE'], 'tweetokenize': ['lexicons/*.txt']},
-    long_description=open('README.md').read(),
+    long_description=open('README.md').read() + '\n\n' + open('CHANGES').read(),
     license='BSD License',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
