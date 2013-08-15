@@ -4,9 +4,10 @@ tweetokenize
 Regular expression based tokenizer for Twitter. Focused on tokenization
 and pre-processing to train classifiers for sentiment, emotion, or mood.
 
-Intended as glue between Python wrappers for Twitter API and the Natural
-Language Toolkit (NLTK), but probably applicable to tokenizing any short
-messages of the social networking variety.
+Intended as glue between Python wrappers for Twitter API and machine
+learning algorithms of the Natural Language Toolkit (NLTK), but probably
+applicable to tokenizing any short messages of the social networking
+variety.
 
 ```python
 from tweetokenize import Tokenizer
@@ -24,10 +25,14 @@ performance of classifiers
 * Allows user-defined sets of emoticons to be used in tokenization
 * Correctly separates emoji, written consecutively, into individual tokens
 
-Using
------
+Installation
+------------
 
     python setup.py install
+
+After installation, you can make sure everything is working by running the following inside the project root folder,
+
+    python tests
 
 Documentation
 -------------

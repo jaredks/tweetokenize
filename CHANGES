@@ -1,0 +1,15 @@
+Changes
+=======
+
+1.0.1 (2013-08-15)
+------------------
+
+- Module docstring
+- Changes to `setup.py`
+- Refactored: gained ~15% speed up for tokenization
+
+
+1.0.0 (2013-05-11 - 2013-06-25)
+-------------------------------
+
+- First version

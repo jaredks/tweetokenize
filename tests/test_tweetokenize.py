@@ -3,7 +3,7 @@
 #
 # tweetokenize: Regular expression based tokenizer for Twitter
 # Copyright: (c) 2013, Jared Suttles. All rights reserved.
-# License: See LICENSE for details.
+# License: BSD, see LICENSE for details.
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 import unittest
 from tweetokenize import Tokenizer
@@ -229,12 +229,12 @@ class TokenizeTests(unittest.TestCase):
     
     def test_error_1(self):
         msg = []
-        with self.assertRaises(Tokenizer.TokenizerException):
+        with self.assertRaises(TypeError):
             self.tokenizer.tokenize(msg)
     
     def test_error_2(self):
-        msg = lambda x:x
-        with self.assertRaises(Tokenizer.TokenizerException):
+        msg = lambda x: x
+        with self.assertRaises(TypeError):
             self.tokenizer.tokenize(msg)
     
     def test_actual_tweets_1(self):

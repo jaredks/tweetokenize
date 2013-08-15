@@ -2,4 +2,4 @@
 *.pyc
 .gitignore
 build
-benchmarks
+bench
